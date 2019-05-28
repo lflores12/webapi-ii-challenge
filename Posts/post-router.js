@@ -63,12 +63,21 @@ router.delete('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const post = await Posts.update(req.params.id, req.body);
-        if (post) {
-            res.status(200).json(post);
-        } else {
-            res.status(404).json({ message: 'the post could not be found'});
+        const post = req.body;
+        const { id } = req.params;
+
+        if (!post.title || !post.contents) {
+            return res.status(400).json({
+                message: 'Error, please provide title and content for post update'
+            });
+        } else if (!id) {
+            return res.status(404).json({
+                message: 'Error, the post with the specified id could not be found'
+            });
         }
+
+        const updatePost = await Posts.update(req.params.id, req.body);
+        return res.status(201).json(updatePost)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -87,9 +96,27 @@ router.get('/:id/comments', (req, res) => {
         });
 });
 
-router.post('/:id/comments', (req, res) => {
-    Posts
-})
+router.post('/:id/comments', async (req, res) => {
+   try { 
+    const post_id = req.params.id;
+    const { text } = await req.body;
+
+    if(!text) {
+        return res.status(400).json({ 
+            message: 'please provide text'
+        })
+    } else if( !post_id) {
+        return res.status(400).json({
+            message: 'the specified id does not exist'
+        })
+    }
+    const newComment = await Posts.insertComment({ text, post_id});
+    return res.status(201).json(newComment)
+
+   } catch (error) {
+       res.status(500).json(error)
+   };
+});
 
 
 
