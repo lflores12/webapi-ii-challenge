@@ -61,6 +61,36 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.put('/:id', async (req, res) => {
+    try {
+        const post = await Posts.update(req.params.id, req.body);
+        if (post) {
+            res.status(200).json(post);
+        } else {
+            res.status(404).json({ message: 'the post could not be found'});
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: 'error updating the post'
+        });
+    }
+});
+
+router.get('/:id/comments', (req, res) => {
+    Posts.findPostComments(req.params.id)
+        .then( comments => {
+            res.status(200).json(comments);
+        })
+        .catch( error => {
+            res.status(500).json(error)
+        });
+});
+
+router.post('/:id/comments', (req, res) => {
+    Posts
+})
+
 
 
 module.exports = router;
